@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CalmPulse - Panic Attack Companion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom, #e0f7fa, #f0f9ff);
+      margin: 0;
+      padding-top: 4rem;
+    }
+    .hero-bg {
+      position: relative;
+      background: linear-gradient(135deg, #6ee7b7, #a78bfa);
+      padding: 2rem 1rem;
+      min-height: calc(100vh - 4rem);
+      display: flex;
+      align-items: center;
+    }
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%23ffffff" fill-opacity="0.15" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,149.3C672,149,768,203,864,213.3C960,224,1056,192,1152,165.3C1248,139,1344,117,1392,106.7L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"%3E%3C/path%3E%3C/svg%3E') no-repeat bottom;
+      z-index: -1;
+    }
+    .animate-slide-up {
+      animation: slideUp 0.6s ease-out;
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.8s ease-in;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .breathing-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #a78bfa;
+      animation: breathe 12s infinite;
+    }
+    @keyframes breathe {
+      0% { transform: scale(0.5); }
+      33% { transform: scale(1); }
+      66% { transform: scale(0.5); }
+      100% { transform: scale(0.5); }
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 40;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    @media (min-width: 768px) {
+      .hero-bg {
+        padding: 4rem 2rem;
+      }
+      input, select, textarea {
+        font-size: 1rem;
+        padding: 1rem;
+      }
+      .header {
+        padding: 1rem 2rem;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Header -->
+  <header class="header">
+    <h1 class="text-xl md:text-2xl font-bold text-gray-800">CalmPulse</h1>
+    <div class="flex space-x-2">
+      <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <section class="hero-bg">
+    <div class="max-w-7xl mx-auto w-full">
+      <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 text-center animate-slide-up">
+        Your Panic Attack Companion
+      </h1>
+      <p class="text-lg md:text-xl text-white mb-6 text-center animate-slide-up" style="animation-delay: 0.2s;">
+        Immediate relief, tracking, and resources to manage anxiety.
+      </p>
+      <!-- Tabs -->
+      <div class="bg-white bg-opacity-90 p-6 rounded-2xl shadow-xl glassmorphism">
+        <div class="flex justify-around mb-4">
+          <button
+            onclick="showTab('relief')"
+            class="tab-button bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+          >
+            Relief
+          </button>
+          <button
+            onclick="showTab('tracker')"
+            class="tab-button bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition"
+          >
+            Tracker
+          </button>
+          <button
+            onclick="showTab('resources')"
+            class="tab-button bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition"
+          >
+            Resources
+          </button>
+        </div>
+        <!-- Relief Tab -->
+        <div id="relief" class="tab-content">
+          <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Immediate Relief Tools</h2>
+          <div class="space-y-4">
+            <!-- Breathing Exercise -->
+            <div class="text-center">
+              <h3 class="text-lg font-semibold text-gray-700">Guided Breathing</h3>
+              <div id="breathingCircle" class="breathing-circle mx-auto mb-2"></div>
+              <p class="text-gray-600">Inhale for 4, hold for 7, exhale for 8.</p>
+              <button
+                onclick="playSound('rain')"
+                class="mt-2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+              >
+                Play Rain Sound
+              </button>
+            </div>
+            <!-- Grounding Technique -->
+            <div class="text-center">
+              <h3 class="text-lg font-semibold text-gray-700">5-4-3-2-1 Grounding</h3>
+              <p id="groundingText" class="text-gray-600">Name 5 things you can see...</p>
+              <button
+                onclick="startGrounding()"
+                class="mt-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+              >
+                Start Grounding
+              </button>
+            </div>
+            <!-- Affirmations -->
+            <div class="text-center">
+              <h3 class="text-lg font-semibold text-gray-700">Affirmations</h3>
+              <p id="affirmationText" class="text-gray-600">I am safe.</p>
+              <button
+                onclick="nextAffirmation()"
+                class="mt-2 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition"
+              >
+                Next Affirmation
+              </button>
+            </div>
+            <!-- SOS Contacts -->
+            <div class="text-center">
+              <h3 class="text-lg font-semibold text-gray-700">SOS Contacts</h3>
+              <div id="sosContacts" class="space-y-2">
+                <!-- Contacts will be added dynamically -->
+              </div>
+              <button
+                onclick="addSOSContact()"
+                class="mt-2 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
+              >
+                Add Contact (Free: 2 Max)
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Tracker Tab -->
+        <div id="tracker" class="tab-content hidden">
+          <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Panic Attack Tracker</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Intensity (1-10)</label>
+              <input
+                type="number"
+                id="intensity"
+                min="1"
+                max="10"
+                class="mt-1 w-full p-2 border border-gray-300 rounded-lg"
+              >
+            </div>
+            <button
+              onclick="logPanicAttack()"
+              class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Log Panic Attack
+            </button>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Weekly Frequency</h3>
+              <canvas id="panicChart" class="w-full h-40"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- Resources Tab -->
+        <div id="resources" class="tab-content hidden">
+          <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Resources</h2>
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Free Guide</h3>
+              <p class="text-gray-600">Download our free PDF: "10 Steps to Manage Panic Attacks"</p>
+              <button
+                onclick="downloadGuide()"
+                class="mt-2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+              >
+                Download Guide
+              </button>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Articles</h3>
+              <ul class="list-disc pl-4 text-gray-600">
+                <li>Understanding Panic Attacks</li>
+                <li>Common Triggers and How to Avoid Them</li>
+                <li>Long-Term Coping Strategies</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Upgrade Section -->
+      <div class="bg-yellow-50 p-4 rounded-lg mt-4">
+        <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center">
+          <i class="fa-solid fa-star mr-2"></i> Upgrade for $14.99
+        </h3>
+        <p class="text-gray-600 text-sm mb-2">
+          Unlock advanced tools, personalized analytics, and more calming resources.
+        </p>
+        <button
+          onclick="upgradeToPremium()"
+          class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition flex items-center justify-center"
+        >
+          <i class="fa-solid fa-crown mr-2"></i> Upgrade Now
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Tab Navigation
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-gray-300', 'text-gray-800');
+      });
+      document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.remove('bg-gray-300', 'text-gray-800');
+      document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('bg-blue-600', 'text-white');
+    }
+
+    // Breathing Exercise
+    let soundPlaying = false;
+    function playSound(sound) {
+      if (soundPlaying) return;
+      const audio = new Audio('https://www.soundjay.com/nature/rain-01.mp3'); // Placeholder URL
+      audio.loop = true;
+      audio.play();
+      soundPlaying = true;
+      setTimeout(() => {
+        audio.pause();
+        soundPlaying = false;
+      }, 30000); // 30 seconds
+    }
+
+    // Grounding Technique
+    const groundingSteps = [
+      "Name 5 things you can see...",
+      "Name 4 things you can touch...",
+      "Name 3 things you can hear...",
+      "Name 2 things you can smell...",
+      "Name 1 thing you can taste..."
+    ];
+    let groundingIndex = 0;
+    function startGrounding() {
+      groundingIndex = 0;
+      document.getElementById('groundingText').textContent = groundingSteps[groundingIndex];
+      const interval = setInterval(() => {
+        groundingIndex++;
+        if (groundingIndex < groundingSteps.length) {
+          document.getElementById('groundingText').textContent = groundingSteps[groundingIndex];
+        } else {
+          clearInterval(interval);
+          document.getElementById('groundingText').textContent = "You’ve completed the grounding exercise!";
+        }
+      }, 10000); // 10 seconds per step
+    }
+
+    // Affirmations
+    const affirmations = [
+      "I am safe.",
+      "This will pass.",
+      "I am in control.",
+      "I am strong.",
+      "I can handle this."
+    ];
+    let affirmationIndex = 0;
+    function nextAffirmation() {
+      affirmationIndex = (affirmationIndex + 1) % affirmations.length;
+      document.getElementById('affirmationText').textContent = affirmations[affirmationIndex];
+    }
+
+    // SOS Contacts
+    let sosContacts = [];
+    function addSOSContact() {
+      if (sosContacts.length >= 2) {
+        alert('Free version allows only 2 SOS contacts. Upgrade to add more.');
+        return;
+      }
+      const name = prompt('Enter contact name:');
+      const phone = prompt('Enter contact phone number:');
+      if (name && phone) {
+        sosContacts.push({ name, phone });
+        updateSOSContacts();
+      }
+    }
+
+    function updateSOSContacts() {
+      const sosDiv = document.getElementById('sosContacts');
+      sosDiv.innerHTML = sosContacts.map((contact, index) => `
+        <div class="flex justify-between items-center">
+          <p>${contact.name}: ${contact.phone}</p>
+          <button
+            onclick="callContact('${contact.phone}')"
+            class="bg-red-600 text-white py-1 px-2 rounded-lg hover:bg-red-700 transition"
+          >
+            Call
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function callContact(phone) {
+      window.location.href = `tel:${phone}`;
+    }
+
+    // Panic Attack Tracker
+    let panicAttacks = [];
+    function logPanicAttack() {
+      const intensity = document.getElementById('intensity').value;
+      if (!intensity || intensity < 1 || intensity > 10) {
+        alert('Please enter a valid intensity between 1 and 10.');
+        return;
+      }
+      const timestamp = new Date();
+      panicAttacks.push({ timestamp, intensity: parseInt(intensity) });
+      updatePanicChart();
+    }
+
+    function updatePanicChart() {
+      const ctx = document.getElementById('panicChart').getContext('2d');
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const dailyCounts = Array(7).fill(0);
+      panicAttacks.forEach(attack => {
+        const attackDate = new Date(attack.timestamp);
+        if (attackDate >= weekAgo) {
+          const dayDiff = Math.floor((now - attackDate) / (24 * 60 * 60 * 1000));
+          if (dayDiff >= 0 && dayDiff < 7) {
+            dailyCounts[6 - dayDiff]++;
+          }
+        }
+      });
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
+          datasets: [{
+            label: 'Panic Attacks',
+            data: dailyCounts,
+            borderColor: '#3b82f6',
+            fill: false
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Download Guide
+    function downloadGuide() {
+      alert('Downloading "10 Steps to Manage Panic Attacks" PDF...');
+      // Placeholder for actual download
+    }
+
+    // Upgrade to Premium
+    function upgradeToPremium() {
+      alert('Upgrade to Premium for $14.99 to unlock advanced features. Redirecting to payment...');
+      // Placeholder for payment integration
+      console.log('Initiating payment for Premium upgrade ($14.99)');
+    }
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      if (document.body.classList.contains('dark')) {
+        document.body.style.background = 'linear-gradient(to bottom, #1e3a8a, #0f172a)';
+        document.querySelectorAll('.bg-white').forEach(el => {
+          el.classList.remove('bg-white');
+          el.classList.add('bg-gray-800', 'text-white');
+        });
+        darkModeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      } else {
+        document.body.style.background = 'linear-gradient(to bottom, #e0f7fa, #f0f9ff)';
+        document.querySelectorAll('.bg-gray-800').forEach(el => {
+          el.classList.remove('bg-gray-800', 'text-white');
+          el.classList.add('bg-white');
+        });
+        darkModeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      }
+    });
+
+    // Initial Setup
+    showTab('relief');
+  </script>
+</body>
+</html>
